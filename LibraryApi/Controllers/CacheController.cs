@@ -10,6 +10,7 @@ namespace LibraryApi.Controllers
 {
     public class CacheController : Controller
     {
+
         IDistributedCache Cache;
 
         public CacheController(IDistributedCache cache)
@@ -17,11 +18,13 @@ namespace LibraryApi.Controllers
             Cache = cache;
         }
 
+
+        [ResponseCache(Duration = 130, Location = ResponseCacheLocation.Client)]
         [HttpGet("/time2")]
-        [ResponseCache(Duration =15, Location =ResponseCacheLocation.Any)]
         public async Task<ActionResult<string>> GetTime2()
         {
-            return Ok($"The Time is {DateTime.Now.ToLongTimeString()}");
+
+            return Ok(new { data = $"The DDDD is {DateTime.Now.ToLongTimeString()}" });
         }
 
         [HttpGet("/time")]
@@ -29,19 +32,32 @@ namespace LibraryApi.Controllers
         {
             var time = await Cache.GetAsync("time");
             string newTime = null;
-            if (time == null)
+            if(time == null) // it wasn't in the cache. never was, or was removed after it expired
             {
                 newTime = DateTime.Now.ToLongTimeString();
                 var encodedTime = Encoding.UTF8.GetBytes(newTime);
                 var options = new DistributedCacheEntryOptions()
                     .SetAbsoluteExpiration(DateTime.Now.AddSeconds(15));
                 await Cache.SetAsync("time", encodedTime, options);
-            }
-            else
+            } else
             {
                 newTime = Encoding.UTF8.GetString(time);
             }
+
             return Ok($"It is now {newTime}");
         }
+
+        [HttpGet("/serverstatus")]
+        [ResponseCache(Duration =15, Location = ResponseCacheLocation.Any)]
+        public ActionResult<CachedStatus> GetServerStatus()
+        {
+            return Ok(new CachedStatus { Status = "All good.", CheckedAt = DateTime.Now });
+        }
+    }
+
+    public class CachedStatus
+    {
+        public string Status { get; set; }
+        public DateTime CheckedAt { get; set; }
     }
 }

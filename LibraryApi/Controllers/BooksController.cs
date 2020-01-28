@@ -14,28 +14,22 @@ namespace LibraryApi.Controllers
 {
     public class BooksController : Controller
     {
-        //LibraryDataContext Context;
-        private IMapBooks BooksMapper;
+
+        IMapBooks BooksMapper;
 
         public BooksController(IMapBooks booksMapper)
         {
             BooksMapper = booksMapper;
         }
 
-        /// <summary>
-        /// Gives you all the books that are currently in inventory
-        /// </summary>
-        /// <returns>uh, those books</returns>
-
         [HttpPut("/books/{id:int}/genre")]
         public async Task<IActionResult> UpdateTheGenre(int id, [FromBody] string genre)
         {
             bool madeChange = await BooksMapper.UpdateGenreFor(id, genre);
-            if (madeChange)
+            if(madeChange)
             {
                 return NoContent();
-            }
-            else
+            } else
             {
                 return NotFound();
             }
@@ -45,7 +39,6 @@ namespace LibraryApi.Controllers
         public async Task<IActionResult> RemoveBookFromInventory(int id)
         {
             await BooksMapper.Remove(id);
-
             return NoContent();
         }
 
@@ -71,7 +64,6 @@ namespace LibraryApi.Controllers
             var response = await BooksMapper.GetBookById(id);
 
             return this.Maybe(response);
-
         }
 
         /// <summary>
@@ -81,11 +73,11 @@ namespace LibraryApi.Controllers
         /// <returns>A List of Books</returns>
         /// <response code="200">Returns all of your books.</response>
         [HttpGet("/books")]
+        [ResponseCache(Duration =10, Location = ResponseCacheLocation.Any)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<GetBooksResponse>> GetAllBooks([FromQuery] string genre = "all")
         {
             GetBooksResponse response = await BooksMapper.GetBooks(genre);
-
             return Ok(response); // for right now.
         }
     }

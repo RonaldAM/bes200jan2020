@@ -9,11 +9,12 @@ using AutoMapper;
 
 namespace LibraryApi.Mappers
 {
-    public class EFBookMapper : IMapBooks
+    public class EfBookMapper : IMapBooks
     {
         LibraryDataContext Context;
         IMapper Mapper;
-        public EFBookMapper(LibraryDataContext context, IMapper mapper)
+
+        public EfBookMapper(LibraryDataContext context, IMapper mapper)
         {
             Context = context;
             Mapper = mapper;
@@ -26,6 +27,7 @@ namespace LibraryApi.Mappers
 
         public async Task<GetBookDetailsResponse> GetBookById(int id)
         {
+            // From Book -> GetBookDetailsResponse
             return await GetBooksInInventory()
                 .Where(b => b.Id == id)
                 .AsNoTracking()
@@ -46,6 +48,7 @@ namespace LibraryApi.Mappers
 
                 return true;
             }
+
         }
 
         public async Task Remove(int id)
@@ -60,11 +63,8 @@ namespace LibraryApi.Mappers
 
         public async Task<GetBookDetailsResponse> Add(PostBooksRequest bookToAdd)
         {
-            // Add it to the domain.
-            //  - PostBooksRequest -> Book
             var book = Mapper.Map<Book>(bookToAdd);
 
-            //  - Add it to the Context.
             Context.Books.Add(book);
             await Context.SaveChangesAsync();
 
@@ -73,6 +73,7 @@ namespace LibraryApi.Mappers
 
         public async Task<GetBooksResponse> GetBooks(string genre)
         {
+
             var books = GetBooksInInventory();
 
             if (genre != "all")
@@ -90,6 +91,7 @@ namespace LibraryApi.Mappers
                 Genre = genre,
                 Count = booksListItems.Count()
             };
+
             return response;
         }
     }

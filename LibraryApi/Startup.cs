@@ -44,7 +44,7 @@ namespace LibraryApi
                 options.UseSqlServer(Configuration.GetConnectionString("LibraryDatabase"))
             );
 
-            services.AddScoped<IMapBooks, EFBookMapper>();
+            services.AddScoped<IMapBooks, EfBookMapper>();
             services.AddAutoMapper(typeof(Startup));
 
             services.AddSwaggerGen(c =>
@@ -71,7 +71,9 @@ namespace LibraryApi
             {
                 options.Configuration = Configuration.GetValue<string>("redisHost");
             });
-           
+
+            services.AddCors();
+            services.AddResponseCaching(options=>options.UseCaseSensitivePaths=false);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -82,7 +84,12 @@ namespace LibraryApi
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseCors();
+            app.UseCors(options =>
+            {
+                options.AllowAnyOrigin();
+                options.AllowAnyMethod();
+                options.AllowAnyHeader();
+            });
             app.UseSwagger();
 
             app.UseSwaggerUI(c =>
@@ -102,6 +109,8 @@ namespace LibraryApi
             {
                 endpoints.MapControllers();
             });
+            app.UseResponseCaching();
+          
         }
     }
 }
