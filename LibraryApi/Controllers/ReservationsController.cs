@@ -12,10 +12,12 @@ namespace LibraryApi.Controllers
 {
     public class ReservationsController : Controller
     {
+        ISendMessagesToTheReservationProcessor reservationProcessor;
         LibraryDataContext Context;
 
-        public ReservationsController(LibraryDataContext context)
+        public ReservationsController(ISendMessagesToTheReservationProcessor reservationProcessor, LibraryDataContext context)
         {
+            this.reservationProcessor = reservationProcessor;
             Context = context;
         }
 
@@ -35,6 +37,9 @@ namespace LibraryApi.Controllers
             //GetBookDetailsResponse response = await BooksMapper.Add(bookToAdd);
             //return CreatedAtRoute("books#getbookbyid", new { id = response.Id }, response);
             var response = MapIt(reservation);
+
+            reservationProcessor.SendForProcessing(response);
+
             return CreatedAtRoute("reservations#getbyid", new { id = response.Id }, response);
         }
 
