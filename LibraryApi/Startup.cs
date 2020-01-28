@@ -18,6 +18,7 @@ using System.Reflection;
 using System.IO;
 using LibraryApi.Mappers;
 using AutoMapper;
+using System.Text.Json.Serialization;
 
 namespace LibraryApi
 {
@@ -35,8 +36,11 @@ namespace LibraryApi
         {
             services.AddControllers()
                 .AddJsonOptions(options =>
-                    // think more about this before you put this in production...
-                    options.JsonSerializerOptions.Converters.Add(new StringToIntConverter())
+                // think more about this before you put this in production...
+                {
+                    options.JsonSerializerOptions.Converters.Add(new StringToIntConverter());
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                }
                 );
             services.AddTransient<IGenerateEnrollmentIds, EnrollmentIdGenerator>();
 
